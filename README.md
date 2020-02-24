@@ -140,7 +140,7 @@ defmodule FawkesWeb.PageController do
 end
 ```
 
-How does this work? `conn` is short for `connection` - its kind of equivalent to the `(req, res)` you might get in node. `render` is a function afforded to us by the controller macro, which is imported at the top:
+How does this work? `conn` is short for `connection` - its kind of equivalent to the `(req, res)` you might get in Node.js. `render` is a function afforded to us by the controller macro, which is imported at the top:
 
 ```elixir
 use FawkesWeb, :controller
@@ -148,7 +148,7 @@ use FawkesWeb, :controller
 
 But where does `"index.html"` come from? Well, Phoenix is pretty smart and is set up to look in the `/templates` directory for the templates it renders. `index.html` matches the `index.html.eex` template we can see in the template folder, which you'll see matches the webpage you saw at `localhost:4000`
 
-Now we understand _roughly_ how.
+Now we understand _roughly_ how that page was served up, but there's still more to learn.
 
 **Let's add a new page to the app**
 
@@ -169,3 +169,112 @@ defmodule FawkesWeb.MagicController do
   end
 end
 ```
+
+We're making a new template too. Let's make it super simple. Add a file to `/templates` called `magic.html.eex` and add the following code:
+
+```html
+<div class="phx-hero">
+  <h2>Accio Brain!</h2>
+</div>
+```
+
+Feel free to spice things up and insert your own favourite Harry Potter quote.
+
+Pointing our browser to `http://localhost:4000/magic`, we should be able to see our own greeting from Phoenix! (if you stopped the server in an earlier step, you can restart it with `mix phx.server`).
+
+**Quick aside: Whats this "eex" stuff?**
+
+`.eex` files are phoenix templates. EEx stands for Embedded Elixir. Phoenix templates are just that, templates into which data can be rendered.
+
+We can interpolate values into our tempalates with syntax like the following:
+
+```elixir
+render(conn, "spell.html", spell_name: "Obliviate")
+```
+
+```html
+<div class="phx-hero">
+  <h2>Say good-bye to your memories! <%= @spell_name %>!</h2>
+</div>
+```
+
+When we use the `render` function in the controller, we're optionally passing in values in as a [keyword list](https://elixir-lang.org/getting-started/keywords-and-maps.html), which in this case is `[spell_name: "Obliviate"]`. The square brackets aren't syntactically necessary, but are there invisibly. This is pasted into the template between the `<%=` and `%>` by using `@` followed by the varable name.
+
+**Add one more route**
+
+As a mini challenge, add a new route `/spell/:spell_name` where spell name is a url param. When passed into a function in a controller, this will come through as a [map](https://elixir-lang.org/getting-started/keywords-and-maps.html) like so:
+
+```elixir
+def index(conn, %{"spell_name" => spell_name}) do
+  # Render a template here
+end
+```
+
+Everything else you need to know to do this can be found in the template
+
+### 1c Examining our routes
+
+Make sure you're in `apps/fawkes` and run the following command:
+
+```
+mix phx.routes
+```
+
+What can you see? Hopefully you can see a list of routes for your phoenix app.
+
+These are likely to all be "GET" routes as we're only adding those. When we declare our routes in `router.ex`, we can use all the usual HTTP verbs (`get`, `post`, `put` etc) but there are some other cool Phoenix-specific words too.
+
+Go back to the `router.ex` file. Add the following line:
+
+```
+resources "/spells", SpellController
+```
+
+Run `mix phx.routes` again. What can you see now?
+
+You should be seeing a LOT more routes. The `resources` keyword automarically generates routes for the following 8 actions:
+
+- `index` (GET)
+- `show` (GET)
+- `edit` (GET)
+- `new` (GET)
+- `create` (POST)
+- `delete` (DELETE)
+- `update` (PUT)
+- `update` (PATCH)
+
+For more information on what these actions are intended for, checkout the Phoenix routing guide [here](https://hexdocs.pm/phoenix/routing.html#resources)
+
+You can exlude it creating certain types of route with:
+
+```elixir
+resources "/comments", CommentController, except: [:delete]
+```
+
+Or you can get it to only create certain routes with
+
+```elixir
+resources "/posts", PostController, only: [:index, :show]
+```
+
+**Note:**
+
+So far in examples I've been using `:index` as the controller action, e.g.
+
+```elixir
+get "/magic", MagicController, :index
+```
+
+However, you're not limited to these keywords, its just convention to use (for example) `:index` for a page.
+
+In an API with loads of routes to the same controller, other words (i.e. function names) might be more appropriate, e.g.
+
+```elixir
+get "/subject/:subject", HogwartsController, :subject_info
+```
+
+### 1d Scoping
+
+Lets go back to our `router.ex` file and see what's going on with the `scope` keywords.
+
+For example, we've been
