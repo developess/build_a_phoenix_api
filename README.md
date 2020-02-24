@@ -1,6 +1,6 @@
 # Learn to build Elixir APIs 💻
 
-This repo consists of 2 exercises to help you get to grips with servers in Elixir. The first is a shortened and themed version of the guide in the [Phoenix docs](https://hexdocs.pm/phoenix/up_and_running.html#content) and uses templates, while the second challenges you to finish a fun geography app called "🌏 Hello, World", by writing an API to serve data to a SPA front end.
+This repo consists of 2 exercises to help you get to grips with servers in Elixir. The first is a shortened and themed version of the guide in the [Phoenix docs](https://hexdocs.pm/phoenix/up_and_running.html#content) and uses templates, while the second challenges you to finish a fun geography app called "Hello, World", by writing an API to serve data to a SPA front end. 🌏
 
 ## Exercise 1 - Your first REST API with Phoenix 🛌🦜
 
