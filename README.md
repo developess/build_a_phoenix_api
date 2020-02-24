@@ -1,6 +1,6 @@
-# Elixir Api Exercise
+# Learn to build Elixir APIs
 
-## Exercise 1 - Playing with the Phoenix defaults
+## Exercise 1 - Your first REST API with Phoenix
 
 ### 1a) Creating the app
 
