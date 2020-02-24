@@ -1,0 +1,49 @@
+# The directory Mix will write compiled artifacts to.
+/_build/
+
+/_releases/
+
+# If you run "mix test --cover", coverage assets end up here.
+/cover/
+
+# The directory Mix downloads your dependencies sources to.
+/deps/
+
+# Where 3rd-party dependencies like ExDoc output generated docs.
+!/doc/
+/doc/*
+!/doc/architecture/
+
+# Ignore .fetch files in case you like to edit your project deps locally.
+/.fetch
+
+# If the VM crashes, it generates a dump, let's ignore it too.
+erl_crash.dump
+
+# Also ignore archive artifacts (built via "mix archive.build").
+*.ez
+
+# Garbage left behind by asdf, no idea why but it seems useless
+.tool-versions-e
+
+# Don't care about mnesia persisted storage
+/tmp
+
+# ElixirLS code dumps
+.elixir_ls
+
+# JS things
+yarn-error.log
+node_modules/**/*
+
+# editors
+.vscode
+.vs
+
+# Erlang hosts file for local dev testing
+.hosts.erlang
+
+# OS files
+.DS_Store
+dumps
+volumes
