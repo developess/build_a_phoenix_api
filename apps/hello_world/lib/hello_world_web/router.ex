@@ -13,8 +13,7 @@ defmodule HelloWorldWeb.Router do
 
     # Part 1:
     # Add new REST API routes here
-    # get "/countries", CountryController, :index
-    # get "/countries/:name", CountryController, :show
-    resources "/spells", SpellsController
+    get "/countries", CountryController, :index
+    get "/countries/:name", CountryController, :show
   end
 end

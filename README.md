@@ -2,7 +2,7 @@
 
 ## Exercise 1 - Playing with the Phoenix defaults
 
-### 1a Creating the app
+### 1a) Creating the app
 
 We're going to start by creating a new Phoenix app in this umbrella application and understanding all the awesome boilerplate that comes with it.
 
@@ -46,7 +46,7 @@ If you can see a web page, then 🎉 you just made a server.
 
 Now, lets dig into the code and work out how this app was created.
 
-### 1b Adding a new page
+### 1b) Adding a new page
 
 Your newly created file structure (in `apps/fawkes`) should look something like the below. The key folder here is the `lib` folder, which holds your application files (equivalent of `src` in other languages).
 
@@ -126,7 +126,7 @@ Routes map unique HTTP verb/path pairs to controller/action pairs which will han
 get "/", PageController, :index
 ```
 
-Here, `get` is our HTTP verb - a get request. `"/"` is the path, the url at which we're serving the resouce. `PageController` is the name of a module in our controllers directory that returns the resource, and `:index` is the action - and corresponds to a function called index in the `PageController` controller.
+Here, `get` is our HTTP verb - a get request. `"/"` is the path, the url at which we're serving the resource. `PageController` is the name of a module in our controllers directory that returns the resource, and `:index` is the action - and corresponds to a function called index in the `PageController` controller.
 
 Let's look inside the `controllers` directory in `page_controller.ex`. You'll see the index function that returns the resource:
 
@@ -140,11 +140,13 @@ defmodule FawkesWeb.PageController do
 end
 ```
 
-How does this work? `conn` is short for `connection` - its kind of equivalent to the `(req, res)` you might get in Node.js. `render` is a function afforded to us by the controller macro, which is imported at the top:
+How does this work? `conn` is short for `connection` - its actually a connection struct: `%Plug.Conn{}` - more on that later. You can think of it as equivalent to the request/response in other languages. `render` is a function afforded to us by the controller macro, which is imported at the top:
 
 ```elixir
 use FawkesWeb, :controller
 ```
+
+`render` takes `conn` as the first argument, and the response body as the second argument.
 
 But where does `"index.html"` come from? Well, Phoenix is pretty smart and is set up to look in the `/templates` directory for the templates it renders. `index.html` matches the `index.html.eex` template we can see in the template folder, which you'll see matches the webpage you saw at `localhost:4000`
 
@@ -210,9 +212,13 @@ def index(conn, %{"spell_name" => spell_name}) do
 end
 ```
 
-Everything else you need to know to do this can be found in the template
+Everything else you need to know to do this can be found in the eex section above!
 
-### 1c Examining our routes
+Test its working by going to `localhost:4000/spell/lumos` to see your spell in the browser.
+
+Sucess? Give yourself a pat on the back and make a cup of tea ☕️
+
+### 1c) Examining our routes
 
 Make sure you're in `apps/fawkes` and run the following command:
 
@@ -222,17 +228,17 @@ mix phx.routes
 
 What can you see? Hopefully you can see a list of routes for your phoenix app.
 
-These are likely to all be "GET" routes as we're only adding those. When we declare our routes in `router.ex`, we can use all the usual HTTP verbs (`get`, `post`, `put` etc) but there are some other cool Phoenix-specific words too.
+These are likely to all be GET routes as we're only adding those. When we declare our routes in `router.ex`, we can use all the usual HTTP verbs (`get`, `post`, `put` etc) but there are some other cool Phoenix-specific words too.
 
 Go back to the `router.ex` file. Add the following line:
 
-```
+```elixir
 resources "/spells", SpellController
 ```
 
 Run `mix phx.routes` again. What can you see now?
 
-You should be seeing a LOT more routes. The `resources` keyword automarically generates routes for the following 8 actions:
+You should be seeing a LOT more routes. The `resources` keyword automatically generates routes for the following 8 actions:
 
 - `index` (GET)
 - `show` (GET)
@@ -245,7 +251,7 @@ You should be seeing a LOT more routes. The `resources` keyword automarically ge
 
 For more information on what these actions are intended for, checkout the Phoenix routing guide [here](https://hexdocs.pm/phoenix/routing.html#resources)
 
-You can exlude it creating certain types of route with:
+If you didn't want all 8 of these routes in your api, you can exclude some like so:
 
 ```elixir
 resources "/comments", CommentController, except: [:delete]
@@ -265,7 +271,7 @@ So far in examples I've been using `:index` as the controller action, e.g.
 get "/magic", MagicController, :index
 ```
 
-However, you're not limited to these keywords, its just convention to use (for example) `:index` for a page.
+However, you're not limited to these keywords, its just convention to use `:index` for a page, (for example).
 
 In an API with loads of routes to the same controller, other words (i.e. function names) might be more appropriate, e.g.
 
@@ -273,8 +279,158 @@ In an API with loads of routes to the same controller, other words (i.e. functio
 get "/subject/:subject", HogwartsController, :subject_info
 ```
 
-### 1d Scoping
+### 1d) Scoping
 
 Lets go back to our `router.ex` file and see what's going on with the `scope` keywords.
 
-For example, we've been
+For example, we've been putting our routes in this section:
+
+```elixir
+  scope "/", FawkesWeb do
+    pipe_through :browser
+
+    get "/", PageController, :index
+    get "/magic", MagicController, :index
+    get "/spell/:spell_name", SpellController, :index
+  end
+```
+
+A scope is a way of grouping routes. All our routes are scoped under the home (`"/"`) route, but we could make another scope under an admin route, for example.
+
+```elixir
+  scope "/admin", FawkesWeb do
+    pipe_through :browser
+    pipe_through :authentication
+
+    get "/spells", PageController, :index
+    get "/magic", PageController, :index
+  end
+```
+
+This would make 2 new routes available, at: `/admin/spells` and `/admin/magic`.
+
+Why would we want to do that? The answer lies in the `pipe_through` functions at the top of each scope. These `pipe_through` functions require requests to be passed through certain `pipelines` before being routed to the relevant controller. These pipelines consist of a series of plugs, which are basically middlewares.
+
+In our boilerplate code we have two pipeline types:
+
+```elixir
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
+  pipeline :api do
+    plug :accepts, ["json"]
+  end
+```
+
+I won't go into the details of each plug (their names are pretty self-explanatory), but these pipelines nicely encapsulate repeated tasks like adding headers, saving session details and specifying content-types.
+
+By creating an `/admin` scope, we can add an authentication pipeline that forces users to be authenticated to access the pages. Pretty cool!
+
+We can even nest scopes within scopes, to create versioned apis. For example:
+
+```elixir
+scope "/api", HelloWeb.Api, as: :api do
+  pipe_through :api
+
+  scope "/v1", V1, as: :v1 do
+    resources "/spells",  ImageController
+    resources "/subjects", ReviewController
+    resources "/creatures",   UserController
+  end
+end
+```
+
+Creates routes like so:
+
+- `api/v1/spells`
+- `api/v1/subjects`
+- `api/v1/creatures`
+
+Note, routes don't **have** to sit inside a scope. They can sit in the router file and should work just the same.
+
+### 1e) Hol' up, whats a plug?
+
+Are you ready to have your mind blown a little bit? Plugs live at the heart of Phoenix's HTTP layer. We've been interacting with plugs throughout this tutorial - they're at every step of the connection lifecycle, and the core Phoenix components like Endpoints, Routers, and Controllers are all just Plugs internally 😱
+
+[`Plug`](https://hexdocs.pm/phoenix/plug.html#content) as a whole is 'a specification for composable modules in between web applications'.
+
+The basic idea of Plug is to unify the concept of a "connection" that we operate on. This differs from other HTTP middleware layers, where the request and response are separated in the middleware stack.
+
+There are 2 key types of plug: `Function plugs` and `Module plugs`
+
+**Function Plugs**
+
+In order to act as a plug, a function simply needs to accept a connection struct (`%Plug.Conn{}`) and options. It also needs to return a connection struct.
+
+Here's an example. It simply converts a `key_values` list to response headers, and adds them to the response.
+
+```elixir
+def put_headers(conn, key_values) do
+  Enum.reduce key_values, conn, fn {k, v}, conn ->
+    Plug.Conn.put_resp_header(conn, to_string(k), v)
+  end
+end
+```
+
+We could use this plug in a pipeline like so:
+
+```elixir
+ pipeline :api do
+    plug :accepts, ["json"]
+    plug :put_headers, %{content_encoding: "gzip", cache_control: "max-age=3600"}
+  end
+```
+
+**Module plugs**
+
+Module plugs are another type of Plug that let us define a connection transformation in a module. The module only needs to implement two functions:
+
+- `init/1` which initializes any arguments or options to be passed to `call/2`
+- `call/2` which carries out the connection transformation. `call/2` is just a function plug like what you see above.
+
+You use a module plug like so:
+
+```elixir
+plug MyWebApp.Plugs.Locale, "en"
+```
+
+For more info on module plugs, and plugs in general read on [here](https://hexdocs.pm/phoenix/plug.html#module-plugs).
+
+### 1f) Returning different stuff, redirecting and error codes
+
+So far we've just rendered templates. What if we want to build an API that returns json, or text?
+
+The answer is suprisingly simple. Remember our `render` function in our controller earlier?
+
+```elixir
+defmodule FawkesWeb.MagicController do
+  use FawkesWeb, :controller
+
+  def index(conn, _params) do
+    render(conn, "magic.html")
+  end
+end
+```
+
+Well, `render` isn't our only option here.
+
+We can return plain text with the `text` function like so:
+
+```elixir
+text(conn, "It does not do to dwell on dreams and forget to live.")
+```
+
+or json with the `json` function like this:
+
+```elixir
+json(conn, %{"spell" => %{"name" => "Imperius Curse", "incantation" => "Imperio"}})
+```
+
+When using `json()`, you should pass in a map with string keys. Phoenix ships with a json encoder/decoder package called `Jason` that takes care encoding that map to json. Win!
+
+**What if I want to return a 404, or a redirect?**
