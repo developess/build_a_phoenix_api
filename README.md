@@ -1,15 +1,17 @@
 # Elixir Api Exercise
 
-## Exercise 1 - Playing with the Phoenix MVP defaults
+## Exercise 1 - Playing with the Phoenix defaults
+
+### 1a Creating the app
 
 We're going to start by creating a new Phoenix app in this umbrella application and understanding all the awesome boilerplate that comes with it.
 
 Start by cloning this repo, and navigating to the root.
 
 ```
-git clone blah-blah
+git clone https://github.com/developess/build_a_phoenix_api.git
 
-cd blah-blah
+cd build_a_phoenix_api
 ```
 
 Since this is an umbrella application, we want to move to the `apps` folder to create a new app under the umbrella. I'm calling my app `fawkes` because this is a throwaway app and it will stand out when we're looking around (plus he's the OG phoenix). **Don't** name your app something generic that you may see in code like 'Test' or 'Elixir' as you'll just confuse yourself!
@@ -22,9 +24,11 @@ cd apps
 mix phx.new fawkes --no-ecto --no-webpack
 ```
 
+`mix phx.new` creates a new phoenix app in the umbrella.
+
 The flags `--no-ecto` and `--no-webpack` reduce some of the boilerplate that comes with phoenix, providing just the skeleton app for this example. Ecto is a database wrapper and webpack is for compiling front end code - we don't need this for now.
 
-That command should have created a new app. Select `Y` to fetch and install dependencies when prompted.
+Select `Y` to fetch and install dependencies when prompted.
 
 If dependencies don't install properly, you may not have a recent version of hex or phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/phoenix/installation.html).
 
@@ -36,11 +40,13 @@ cd fawkes
 mix phx.server
 ```
 
-With your server up and running, check out the app at `localhost:4000`.
+With your server up and running, check out the app at `localhost:4000`
+
+If you can see a web page, then 🎉 you just made a server.
 
 Now, lets dig into the code and work out how this app was created.
 
-## Adding a new page
+### 1b Adding a new page
 
 Your newly created file structure (in `apps/fawkes`) should look something like the below. The key folder here is the `lib` folder, which holds your application files (equivalent of `src` in other languages).
 
@@ -134,4 +140,32 @@ defmodule FawkesWeb.PageController do
 end
 ```
 
-How does this work? `conn` is short for `connection` - its kind of equivalent to the `(req, res)` you might get in node. `render` is a
+How does this work? `conn` is short for `connection` - its kind of equivalent to the `(req, res)` you might get in node. `render` is a function afforded to us by the controller macro, which is imported at the top:
+
+```elixir
+use FawkesWeb, :controller
+```
+
+But where does `"index.html"` come from? Well, Phoenix is pretty smart and is set up to look in the `/templates` directory for the templates it renders. `index.html` matches the `index.html.eex` template we can see in the template folder, which you'll see matches the webpage you saw at `localhost:4000`
+
+Now we understand _roughly_ how.
+
+**Let's add a new page to the app**
+
+In `router.ex` add a new route.
+
+```elixir
+get "/magic", MagicController, :index
+```
+
+Since we're using a new controller, let's create a new file in the `controllers` directory.
+
+```elixir
+defmodule FawkesWeb.MagicController do
+  use FawkesWeb, :controller
+
+  def index(conn, _params) do
+    render(conn, "magic.html")
+  end
+end
+```
