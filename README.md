@@ -24,15 +24,15 @@ cd apps
 mix phx.new fawkes --no-ecto --no-webpack
 ```
 
-`mix phx.new` creates a new phoenix app in the umbrella.
+`mix phx.new` creates a new Phoenix app in the umbrella.
 
-The flags `--no-ecto` and `--no-webpack` reduce some of the boilerplate that comes with phoenix, providing just the skeleton app for this example. Ecto is a database wrapper and webpack is for compiling front end code - we don't need this for now.
+The flags `--no-ecto` and `--no-webpack` reduce some of the boilerplate that comes with Phoenix, providing just the skeleton app for this example. Ecto is a database wrapper and webpack is for compiling front end code - we don't need this for now.
 
 Select `Y` to fetch and install dependencies when prompted.
 
-If dependencies don't install properly, you may not have a recent version of hex or phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/phoenix/installation.html).
+If dependencies don't install properly, you may not have a recent version of hex or Phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/Phoenix/installation.html).
 
-Now let's start this new phoenix app using `mix phx.server`:
+Now let's start this new Phoenix app using `mix phx.server`:
 
 ```
 cd fawkes
@@ -186,7 +186,7 @@ Pointing our browser to `http://localhost:4000/magic`, we should be able to see 
 
 **Quick aside: Whats this "eex" stuff?**
 
-`.eex` files are phoenix templates. EEx stands for Embedded Elixir. Phoenix templates are just that, templates into which data can be rendered.
+`.eex` files are Phoenix templates. EEx stands for Embedded Elixir. Phoenix templates are just that, templates into which data can be rendered.
 
 We can interpolate values into our tempalates with syntax like the following:
 
@@ -226,11 +226,11 @@ Make sure you're in `apps/fawkes` and run the following command:
 mix phx.routes
 ```
 
-What can you see? Hopefully you can see a list of routes for your phoenix app.
+What can you see? Hopefully you can see a list of routes for your Phoenix app.
 
-These are likely to all be GET routes as we're only adding those. When we declare our routes in `router.ex`, we can use all the usual HTTP verbs (`get`, `post`, `put` etc) but there are some other cool Phoenix-specific words too.
+These are likely to all be GET routes as we're only adding those. When we declare our routes in `router.ex`, we can use all the usual HTTP verbs (`get`, `post`, `put` etc) but there are some other cool macros we can use too.
 
-Go back to the `router.ex` file. Add the following line:
+Go back to the `router.ex` file. Add the following route:
 
 ```elixir
 resources "/spells", SpellController
@@ -257,7 +257,7 @@ If you didn't want all 8 of these routes in your api, you can exclude some like 
 resources "/comments", CommentController, except: [:delete]
 ```
 
-Or you can get it to only create certain routes with
+Or you can just specify the routes you want:
 
 ```elixir
 resources "/posts", PostController, only: [:index, :show]
@@ -271,7 +271,7 @@ So far in examples I've been using `:index` as the controller action, e.g.
 get "/magic", MagicController, :index
 ```
 
-However, you're not limited to these keywords, its just convention to use `:index` for a page, (for example).
+However, you're not limited to `index`, or any other keywords like `show` or `create`. Its just convention to use `:index` for a page, for example.
 
 In an API with loads of routes to the same controller, other words (i.e. function names) might be more appropriate, e.g.
 
@@ -309,7 +309,7 @@ A scope is a way of grouping routes. All our routes are scoped under the home (`
 
 This would make 2 new routes available, at: `/admin/spells` and `/admin/magic`.
 
-Why would we want to do that? The answer lies in the `pipe_through` functions at the top of each scope. These `pipe_through` functions require requests to be passed through certain `pipelines` before being routed to the relevant controller. These pipelines consist of a series of plugs, which are basically middlewares.
+Why would we want to do that? The answer lies in the `pipe_through` functions at the top of each scope. These `pipe_through` functions require requests to be passed through certain `pipelines` before being routed to the relevant controller. These pipelines consist of a series of `plugs`, which are special functions or modules, that are equivalent to 'middlewares'.
 
 In our boilerplate code we have two pipeline types:
 
@@ -327,11 +327,11 @@ In our boilerplate code we have two pipeline types:
   end
 ```
 
-I won't go into the details of each plug (their names are pretty self-explanatory), but these pipelines nicely encapsulate repeated tasks like adding headers, saving session details and specifying content-types.
+I won't go into the details of each plug (their names are pretty self-explanatory), but these pipelines nicely encapsulate repeated tasks like adding headers or specifying content-types.
 
-By creating an `/admin` scope, we can add an authentication pipeline that forces users to be authenticated to access the pages. Pretty cool!
+By creating an `/admin` scope, we could add an authentication pipeline that forces users to be authenticated to access certain pages. Pretty cool!
 
-We can even nest scopes within scopes, to create versioned apis. For example:
+We can even nest scopes within scopes, to create versioned APIs. For example:
 
 ```elixir
 scope "/api", HelloWeb.Api, as: :api do
@@ -351,17 +351,19 @@ Creates routes like so:
 - `api/v1/subjects`
 - `api/v1/creatures`
 
-Note, routes don't **have** to sit inside a scope. They can sit in the router file and should work just the same.
+Note, routes don't **have** to sit inside a scope, and plugs don't **have** to sit inside pipelines. If you had a simple server that treated all requests the same, you could have a few plug middlewares followed by a few lone routes, and requests would run top-to-bottom through the plugs before finding their route. However, by doing so you'd be missing out on the neat router modularisation that Phoenix offers.
 
-### 1e) Hol' up, whats a plug?
+### 1e) Hol' up, whats exactly is a plug?
 
 Are you ready to have your mind blown a little bit? Plugs live at the heart of Phoenix's HTTP layer. We've been interacting with plugs throughout this tutorial - they're at every step of the connection lifecycle, and the core Phoenix components like Endpoints, Routers, and Controllers are all just Plugs internally 😱
 
-[`Plug`](https://hexdocs.pm/phoenix/plug.html#content) as a whole is 'a specification for composable modules in between web applications'.
+Plugs aren't something created by Phoenix - they're a thing used by Phoenix, and can be used outside Phoenix when dealing with HTTP in elixir more generally. Remember, Phoenix isn't the only way to make a web server in elixir, just like Express isn't the only way to make a server in Node.js.
 
-The basic idea of Plug is to unify the concept of a "connection" that we operate on. This differs from other HTTP middleware layers, where the request and response are separated in the middleware stack.
+[`Plug`](https://hexdocs.pm/phoenix/plug.html#content) the specification describes itself as 'a specification for composable modules in between web applications'.
 
-There are 2 key types of plug: `Function plugs` and `Module plugs`
+The basic idea of Plug is to unify the concept of a "connection" that we operate on. This differs from other HTTP middleware layers (e.g. Rack), where the request and response are separated in the middleware stack.
+
+There are 2 main types of plug: `Function plugs` and `Module plugs`
 
 **Function Plugs**
 
@@ -431,6 +433,32 @@ or json with the `json` function like this:
 json(conn, %{"spell" => %{"name" => "Imperius Curse", "incantation" => "Imperio"}})
 ```
 
-When using `json()`, you should pass in a map with string keys. Phoenix ships with a json encoder/decoder package called `Jason` that takes care encoding that map to json. Win!
+When using `json()`, you should pass in a map with string keys. Phoenix ships with a json encoder/decoder package called `Jason` that takes care of encoding that map to json. Win!
 
 **What if I want to return a 404, or a redirect?**
+
+[`Phoenix.Controller`](https://hexdocs.pm/phoenix/Phoenix.Controller.html#content) offers several functions including `redirect` out the box:
+
+```elixir
+redirect(conn, to: "/login")
+```
+
+However, we might want something a bit more home-grown. Because the `conn` argument is a `%Plug.Conn` struct, we can go to the `Plug` documentation and find some more fundamental functions, like `send_resp` for sending responses. Check out some of our options [here](https://hexdocs.pm/plug/Plug.Conn.html).
+
+Phoenix abstracts away a lot of these functions for us, by creating controller macros like `json()`. This is good and bad. It makes things easy, but sometimes we can't find the thing we need or we don't see how things are really working 'under the hood'. We can get back to basics with code like this:
+
+```elixir
+send_resp(conn, 404, "Much like the room of requirement, this web page is not found\n")
+```
+
+## You made it to the end! 🎉🔥
+
+Congrats on making it through this exercise. Don't worry, the next one is much less text-heavy and more hands on!
+
+I hope this helped you get to grips with Phoenix, and you are beginning to understand the power and flexibility of web server programming in Elixir!
+
+**Part deux**
+
+You should see a directory called `hello_world` inside your `apps` folder. Navigate to the README in there to find your next challenge. Or go to the github web page [here](https://github.com/developess/build_a_phoenix_api/blob/master/apps/hello_world/README.md)
+
+...After a deserved break from your screen, and maybe a cookie 🍪
