@@ -16,6 +16,18 @@ git clone https://github.com/developess/build_a_phoenix_api.git
 cd build_a_phoenix_api
 ```
 
+Next, ensure you have phoenix installed. Install/update hex by running:
+
+```
+mix local.hex
+```
+
+Then install the phoenix archive
+
+```
+mix archive.install hex phx_new 1.4.14
+```
+
 Since this is an umbrella application, we want to move to the `apps` folder to create a new app under the umbrella. I'm calling my app `fawkes` because this is a throwaway app and it will stand out when we're looking around (plus he's the OG phoenix). **Don't** name your app something generic that you may see in code like 'Test' or 'Elixir' as you'll just confuse yourself!
 
 From the project root, run:
@@ -169,12 +181,20 @@ defmodule FawkesWeb.MagicController do
   use FawkesWeb, :controller
 
   def index(conn, _params) do
-    render(conn, "magic.html")
+    render(conn, "index.html")
   end
 end
 ```
 
-We're making a new template too. Let's make it super simple. Add a file to `/templates` called `magic.html.eex` and add the following code:
+In order to render templates for MagicController, we need a MagicView. Create a new file called `magic_view.ex` in the views directory and include the following:
+
+```elixir
+defmodule FawkesWeb.MagicView do
+  use FawkesWeb, :view
+end
+```
+
+We're also going to need a new template. Let's make it super simple. We want to namespace our magic, so create a `/magic` directory inside `/templates` and add a file called `magic.html.eex` and add the following code:
 
 ```html
 <div class="phx-hero">
