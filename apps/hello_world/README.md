@@ -8,7 +8,7 @@ First, lets get this server up and running. From inside this app:
 
 - Install dependencies with `mix deps.get`
 - Start Phoenix endpoint with `mix phx.server`
-- Visit [`localhost:4000/test`](http://localhost:4000/test) from your browser.
+- Visit [`localhost:4000/api/test`](http://localhost:4000/test) from your browser.
 
 You should be able to see the text "Hello, World", which is from a test route we've implemented for you in `router.ex`.
 

@@ -22,7 +22,7 @@ Next, ensure you have phoenix installed. Install/update hex by running:
 mix local.hex
 ```
 
-Then install the phoenix archive
+Then install the phoenix archive:
 
 ```
 mix archive.install hex phx_new 1.4.14
@@ -194,7 +194,7 @@ defmodule FawkesWeb.MagicView do
 end
 ```
 
-We're also going to need a new template. Let's make it super simple. We want to namespace our magic, so create a `/magic` directory inside `/templates` and add a file called `magic.html.eex` and add the following code:
+We're also going to need a new template. Let's make it super simple. We want to namespace our magic, so create a `/magic` directory inside `/templates` and add a file called `index.html.eex` and add the following code:
 
 ```html
 <div class="phx-hero">
