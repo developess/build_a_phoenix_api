@@ -44,7 +44,7 @@ The flags `--no-ecto` and `--no-webpack` reduce some of the boilerplate that com
 
 Select `Y` to fetch and install dependencies when prompted.
 
-If dependencies don't install properly, you may not have a recent version of hex or Phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/Phoenix/installation.html).
+If dependencies don't install properly, you may not have a recent version of hex or Phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/phoenix/installation.html).
 
 Now let's start this new Phoenix app using `mix phx.server`:
 
