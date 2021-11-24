@@ -5,13 +5,17 @@ defmodule HelloWorld.Application do
 
   use Application
 
+  @impl true
   def start(_type, _args) do
-    # List all child processes to be supervised
     children = [
-      # Start the endpoint when the application starts
+      # Start the Telemetry supervisor
+      HelloWorldWeb.Telemetry,
+      # Start the PubSub system
+      {Phoenix.PubSub, name: HelloWorld.PubSub},
+      # Start the Endpoint (http/https)
       HelloWorldWeb.Endpoint
-      # Starts a worker by calling: HelloWorld.Worker.start_link(arg)
-      # {HelloWorld.Worker, arg},
+      # Start a worker by calling: HelloWorld.Worker.start_link(arg)
+      # {HelloWorld.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -22,6 +26,7 @@ defmodule HelloWorld.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
+  @impl true
   def config_change(changed, _new, removed) do
     HelloWorldWeb.Endpoint.config_change(changed, removed)
     :ok
