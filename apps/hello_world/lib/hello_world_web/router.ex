@@ -12,5 +12,7 @@ defmodule HelloWorldWeb.Router do
     get "/test", CountryController, :test
 
     # Add new API routes here
+    get "/countries/:name", CountryController, :country
+    get "/countries", CountryController, :all_countries
   end
 end
