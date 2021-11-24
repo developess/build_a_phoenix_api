@@ -25,7 +25,7 @@ mix local.hex
 Then install the phoenix archive:
 
 ```
-mix archive.install hex phx_new 1.4.14
+mix archive.install hex phx_new
 ```
 
 Since this is an umbrella application, we want to move to the `apps` folder to create a new app under the umbrella. I'm calling my app `fawkes` because this is a throwaway app and it will stand out when we're looking around (plus he's the OG phoenix). **Don't** name your app something generic that you may see in code like 'Test' or 'Elixir' as you'll just confuse yourself!
@@ -35,23 +35,21 @@ From the project root, run:
 ```
 cd apps
 
-mix phx.new fawkes --no-ecto --no-webpack
+mix phx.new fawkes --no-ecto --no-dashboard --no-live --no-mailer --no-assets --install
 ```
 
 `mix phx.new` creates a new Phoenix app in the umbrella.
 
-The flags `--no-ecto` and `--no-webpack` reduce some of the boilerplate that comes with Phoenix, providing just the skeleton app for this example. Ecto is a database wrapper and webpack is for compiling front end code - we don't need this for now.
-
-Select `Y` to fetch and install dependencies when prompted.
+The flags `--no-ecto --no-dashboard` etc. reduces some of the boilerplate that comes with Phoenix, providing just the skeleton app for this example. Ecto is a database wrapper - we don't need this for now.
 
 If dependencies don't install properly, you may not have a recent version of hex or Phoenix downloaded. Try running `mix local.hex` and installing deps again with `mix deps.get`. Still having issues? Check the [phoenix installation guide](https://hexdocs.pm/Phoenix/installation.html).
 
-Now let's start this new Phoenix app using `mix phx.server`:
+Now let's start this new Phoenix app in interactive mode using `iex -S mix phx.server`:
 
 ```
 cd fawkes
 
-mix phx.server
+iex -S mix phx.server
 ```
 
 With your server up and running, check out the app at `localhost:4000`
@@ -103,7 +101,7 @@ Inside `fawkes_web` our file structure looks like this:
 
 As you might recognise, Phoenix has set up a classic "MVC" (Model, View, Controller) pattern for us. I won't dive into the merits of this pattern here, but it provides a useful scaffold to make sense of all these files!
 
-Open up `router.ex`. The router is often the heart of a web server and is a useful place to start.
+Open up `router.ex`. The router is the heart of a web server and is a useful place to start.
 
 ```elixir
 defmodule FawkesWeb.Router do
@@ -112,7 +110,8 @@ defmodule FawkesWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
+    plug :fetch_live_flash
+    plug :put_root_layout, {FawkesWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -162,7 +161,7 @@ use FawkesWeb, :controller
 
 `render` takes `conn` as the first argument, and the response body as the second argument.
 
-But where does `"index.html"` come from? Well, Phoenix is pretty smart and is set up to look in the `/templates` directory for the templates it renders. `index.html` matches the `index.html.eex` template we can see in the template folder, which you'll see matches the webpage you saw at `localhost:4000`
+But where does `"index.html"` come from? Well, Phoenix is pretty smart and is set up to look in the `/templates` directory for the templates it renders. `index.html` matches the `index.html.eex` template we can see in the `templates/pages` folder, which you'll see matches the webpage you saw at `localhost:4000`
 
 Now we understand _roughly_ how that page was served up, but there's still more to learn.
 
@@ -204,7 +203,7 @@ We're also going to need a new template. Let's make it super simple. We want to 
 
 Feel free to spice things up and insert your own favourite Harry Potter quote.
 
-Pointing our browser to `http://localhost:4000/magic`, we should be able to see our own greeting from Phoenix! (if you stopped the server in an earlier step, you can restart it with `mix phx.server`).
+Pointing our browser to `http://localhost:4000/magic`, we should be able to see our own greeting from Phoenix!
 
 **Quick aside: Whats this "eex" stuff?**
 
@@ -218,7 +217,7 @@ render(conn, "spell.html", spell_name: "Obliviate")
 
 ```html
 <div class="phx-hero">
-  <h2>Say good-bye to your memories! <%= @spell_name %>!</h2>
+  <h2>Say goodbye to your memories! <%= @spell_name %>!</h2>
 </div>
 ```
 
@@ -339,7 +338,8 @@ In our boilerplate code we have two pipeline types:
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
+    plug :fetch_live_flash
+    plug :put_root_layout, {FawkesWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -379,7 +379,7 @@ Note, routes don't **have** to sit inside a scope, and plugs don't **have** to s
 
 Are you ready to have your mind blown a little bit? Plugs live at the heart of Phoenix's HTTP layer. We've been interacting with plugs throughout this tutorial - they're at every step of the connection lifecycle, and the core Phoenix components like Endpoints, Routers, and Controllers are all just Plugs internally 😱
 
-Plugs aren't something created by Phoenix - they're a thing used by Phoenix, and can be used outside Phoenix when dealing with HTTP in elixir more generally. Remember, Phoenix isn't the only way to make a web server in elixir, just like Express isn't the only way to make a server in Node.js.
+Plugs aren't something created by Phoenix - they're a thing used by Phoenix, and can be used outside Phoenix when dealing with HTTP in elixir more generally. Remember, Phoenix isn't the only way to make a web server in Elixir, just like Express isn't the only way to make a server in Node.js.
 
 [`Plug`](https://hexdocs.pm/phoenix/plug.html#content) the specification describes itself as 'a specification for composable modules in between web applications'.
 
