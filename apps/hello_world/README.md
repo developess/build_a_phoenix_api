@@ -22,7 +22,21 @@ Go to that repo, clone and start the app, to see what you're working with.
 
 You'll notice there are 2 pages in the app - `CountryList` and `CountryPage` - which make API calls using `axios`. These pages currently aren't working, because the routes they call don't exist!
 
-To make these requests work, you need to create **2 new endpoints** in your elixir code to deliver the necessary data.
+They are expecting routes:
+
+```
+/api/countries
+/api/country/:name
+```
+
+Where name is a country name.
+
+In response from these endpoints they expect JSON in a format:
+`{country: {...}}` for `/api/country/:name`
+and
+`{countries: [...]}` for `/api/countries`
+
+To make these requests work, you need to create **2 new routes** in your elixir code to deliver the necessary data. You can use the existing country_controller.ex where the test route lives.
 
 Please note, you DO NOT need to change the javascript app! Try and make your app work without changing the front end.
 
